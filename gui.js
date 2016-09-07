@@ -44,8 +44,8 @@ var GUI = {
     this.clients_in = new ws.Server({ port:socketPort })
 
     //interfaceJS =  fs.readFileSync( '../external/zepto.js', ['utf-8'] );
-    interfaceJS = fs.readFileSync( __dirname + '/node_modules/interface.js/build/interface.js', ['utf-8'] );
-    interfaceJS += fs.readFileSync( __dirname + '/node_modules/interface.js/server/interface.client.js', ['utf-8'] );
+    interfaceJS = fs.readFileSync( __dirname + '/node_modules/interface.js/dist/interface.lib.js', ['utf-8'] );
+    // interfaceJS += fs.readFileSync( __dirname + '/node_modules/interface.js/server/interface.client.js', ['utf-8'] );
 
     osc = udp.createSocket( 'udp4', function( _msg, rinfo ) {
       var msg = oscMin.fromBuffer( _msg )
@@ -70,7 +70,7 @@ var GUI = {
     osc.bind( oscInPort )
     serveInterfaceJS = function(req, res, next){
     	req.uri = url.parse( req.url );
-    	if( req.uri.pathname == "/interface.js" ) {
+    	if( req.uri.pathname == "/interface.lib.js" ) {
     		res.writeHead( 200, {
     			'Content-Type': 'text/javascript',
     			'Content-Length': interfaceJS.length
@@ -95,16 +95,15 @@ var GUI = {
       socket.idNumber = idNumber++
       socket.on( 'message', function( obj ) {
         var msg = JSON.parse( obj );
-    
         if(msg.type === 'osc') {
           if( appendID ) {  // append client id
             msg.parameters.push( socket.idNumber )
           }
+          console.log(msg)
           socket.device.emit( msg.address.slice(1), msg.parameters )
         }else{
           msg.values.unshift( msg.address )
           var output = IS.switchboard.route.call( IS.switchboard, msg.values )
-      
           if( msg.address === '/interface/ioManager/createDevice' ) {
             socket.device = output
           }

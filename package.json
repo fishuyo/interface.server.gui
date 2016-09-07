@@ -7,7 +7,7 @@
     "test": "tests"
   },
   "dependencies": {
-    "interface.js": "~0.2.1",
+    "interface.js": "git://github.com/charlieroberts/interface.js.git#v2",
     "lodash": "~2.4.1",
     "osc-min": "~0.2.0",
     "connect": "~3.3.3",

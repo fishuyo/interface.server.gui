@@ -1,6 +1,6 @@
 <html>
 <head>
-  <script src='interface.js'></script>
+  <script src='interface.lib.js'></script>
 </head>
 <body>
   <script>
@@ -9,22 +9,26 @@
     // You can manually send OSC messages with the following syntax:
     // Interface.OSC.send('/test', 'f', 5.7);
     
-    panel = new Interface.Panel({ useRelativeSizesAndPositions: true });
+    panel = Interface.Panel.create();
     
     // send a message to the address '/button'
-    a = new Interface.Button({
-      bounds:[0,0,1,.5],
+    a = Interface.Button.create({
+      x:0, y:0,
+      width:1, height:0.5,
       mode:'toggle',
-      target:"OSC",
-      name:'button'
+      target:"osc",
+      name:'button',
+      address:'/button'
     })
     
     // send a message to the address '/slider'
-    b = new Interface.Slider({
-      bounds:[0,.5,1,.5],
+    b = Interface.Slider.create({
+      x:0, y:0.5,
+      width:1, height:0.5,
       isVertical:false,
-      target:"OSC",
-      name:'slider'
+      target:"osc",
+      name:'slider',
+      address:'/slider'
     })
     panel.add( a, b );
     
@@ -32,9 +36,11 @@
     // same address as the key of one of the widgets (here /button and /slider) the value
     // of that widget will be set using the parameters of the received OSC message.
     
-    Interface.OSC.receive = function( address, typetags, parameters ) {
-      console.log( address, typetags, parameters )
-    }
+    // Interface.Communication.OSC._receive = function( msg ){ //(address, typetags, parameters ) {
+      // console.log( msg )
+      // console.log( msg["parameters"] )
+      // b.value = msg['parameters']
+    // }
     
     var device = {
       name:'mydevice',
@@ -42,13 +48,14 @@
       outputs:{}
     }
   
-    Interface.Socket.onopen = function() {
+    Interface.Communication.Socket.onopen = function() {
       for( var i = 0; i < panel.children.length; i++ ) {
         var widget = panel.children[i]
+        device.inputs[ widget.name ] = { min: widget.min, max:widget.max }
         device.outputs[ widget.name ] = { min: widget.min, max:widget.max }
       }
       
-      Interface.Socket.send( JSON.stringify({ address:'/interface/ioManager/createDevice', values:[ device ] }) )
+      Interface.Communication.Socket.send( JSON.stringify({ address:'/interface/ioManager/createDevice', values:[ device ] }) )
     }
     
   </script>
